@@ -2,14 +2,13 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, Truck, WalletCards } from 'lucide-react';
 
 type Lead = { id:string; side:'owner'|'provider'; name:string; email:string; phone:string; organisation:string; country:string; metalType:string; route:string; timing:string; services:string[]; coverage:string; credentials:string; notes:string; consent:boolean; createdAt:string; status:'New'|'Contacted'|'Qualified'|'Closed'; source:string };
 const key='aurum-link-leads-v1';
 export default function JoinPage(){
- const params=useSearchParams(); const [side,setSide]=useState<'owner'|'provider'>('owner'); const [done,setDone]=useState(false); const [error,setError]=useState('');
- useEffect(()=>{if(params.get('side')==='provider')setSide('provider')},[params]);
+ const [side,setSide]=useState<'owner'|'provider'>('owner'); const [done,setDone]=useState(false); const [error,setError]=useState('');
+ useEffect(()=>{if(new URLSearchParams(window.location.search).get('side')==='provider')setSide('provider')},[]);
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setError('');const fd=new FormData(e.currentTarget);if(fd.get('consent')!=='on'){setError('Please confirm consent before continuing.');return}
  const lead:Lead={id:typeof crypto!=='undefined'&&'randomUUID'in crypto?crypto.randomUUID():String(Date.now()),side,name:String(fd.get('name')||''),email:String(fd.get('email')||''),phone:String(fd.get('phone')||''),organisation:String(fd.get('organisation')||''),country:String(fd.get('country')||''),metalType:String(fd.get('metalType')||''),route:String(fd.get('route')||''),timing:String(fd.get('timing')||''),services:fd.getAll('services').map(String),coverage:String(fd.get('coverage')||''),credentials:String(fd.get('credentials')||''),notes:String(fd.get('notes')||''),consent:true,createdAt:new Date().toISOString(),status:'New',source:'Aurum Link join form'};
  try{const old=JSON.parse(localStorage.getItem(key)||'[]');localStorage.setItem(key,JSON.stringify([lead,...old]));setDone(true);window.scrollTo({top:0,behavior:'smooth'})}catch{setError('Your browser could not save this demo entry. Please try again.')}
